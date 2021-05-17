@@ -5,18 +5,25 @@ use \Psr\Http\Message\ResponseInterface as Response;
 require_once '../vendor/autoload.php';
 
 $app = new \Slim\App;
-$app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
-    $name = $args['name'];
-    $response->getBody()->write("Hello, $name");
+/**
+ * Example route:
+ * 
+ *  $app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
+ *    $name = $args['name'];
+ *    $response->getBody()->write("Hello, $name");
+ *    return $response;
+ *  });
+ *
+ */
 
-    return $response;
-});
-$app->get('/', function (Request $request, Response $response, array $args) {
-  
-    $response->getBody()->write("Hello");
+/**
+ * New routes
+ */
 
-    return $response;
-}); 
+
+
+
+ 
 $app->run();
 
 
