@@ -8,7 +8,7 @@ class DB
 
   public function connect()
   {
-    @$con = new mysqli($this->host,$this->user,$this->pw,$this->db);
+    @$con = new mysqli($this->host, $this->user, $this->pw, $this->db);
     @$con->set_charset("utf8");
     if(@$con->connect_errno){
       return false;
@@ -18,4 +18,5 @@ class DB
     }
   }
 
+  
 }
