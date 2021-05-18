@@ -1,10 +1,15 @@
 <?php
-use \Psr\Http\Message\ServerRequestInterface as Request;
-use \Psr\Http\Message\ResponseInterface as Response;
+header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
 
 require_once '../vendor/autoload.php';
+  
+$config = ['settings' => [
+  'addContentLengthHeader' => true,
+  'displayErrorDetails' => true
+]]; 
 
-$app = new \Slim\App;
+$app = new \Slim\App($config);
 /**
  * Example route:
  * 
@@ -20,7 +25,7 @@ $app = new \Slim\App;
  * New routes
  */
 
-
+require "../src/routes/login.php";
 
 
  
