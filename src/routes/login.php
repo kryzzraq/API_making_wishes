@@ -2,14 +2,15 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-//constantes
+
 require_once '../src/config/config.php';
-//manejador BD
 require_once '../src/config/db.php';
 
 
-$app->post('/login', function (Request $request, Response $response, array $args) {
-        $response = $request->getParam("email");
-        
-        return $name->withHeader('Access-Control-Allow-Origin', '*');
-      });
+$app->get('/hola', function (Request $request, Response $response, array $args) {
+  $a = "Hola";
+  $response->getBody()->write($a);
+  $response->withHeader('Content-Type', 'application/json');
+  var_dump($response);
+  return $response;
+});
