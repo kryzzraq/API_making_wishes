@@ -10,16 +10,30 @@ $config = ['settings' => [
 ]]; 
 
 $app = new \Slim\App($config);
-/**
- * Example route:
- * 
- *  $app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
- *    $name = $args['name'];
- *    $response->getBody()->write("Hello, $name");
- *    return $response;
- *  });
- *
- */
+
+$middleware = function ($request, $response, $next) 
+{
+  $route = $request->getUri()->getPath();
+
+  $publicRoutes = [
+    '/login',
+    '/signin'
+  ];
+
+  if(!in_array($route, $publicRoutes)) {
+    $response = $next($request, $response);
+  } else {
+    $auth = apache_request_headers();
+    $auth = $auth['Authorization'];
+
+    if (JWT::validate($auth, TOKEN_KEY)) {
+      $response = $next($request, $response);
+    } else {
+      $response = $response->withStatus(401);
+    }
+  }
+  return $response;
+};
 
 /**
  * New routes
@@ -28,8 +42,5 @@ $app = new \Slim\App($config);
 require "../src/routes/login.php";
 
 
- 
+$app->add($middleware);
 $app->run();
-
-
-
