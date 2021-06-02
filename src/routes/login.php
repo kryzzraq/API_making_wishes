@@ -34,7 +34,7 @@ $app->post('/login', function (Request $request, Response $response, array $args
       $now = new DateTime();
       $expirationDate = new DateTime("now +1 hours");
       $payload = [
-        "id_user" => "a",
+        "id_user" => $ret[0]["id_user"],
         "rol" => "wisher",
         "starts" => $now->getTimeStamp(),
         "ends" => $expirationDate->getTimeStamp()
@@ -172,7 +172,43 @@ $app->post('/signin', function (Request $request, Response $response, array $arg
 $app->get('/signoff', function (Request $request, Response $response) {
   $path = $request->getUri()->getPath();
   $response->withStatus(200);
-  $response->getBody()->write( $path);
+  $response->getBody()->write($path);
   $response->withHeader('Content-Type', 'application/json');
   return $response; 
+});
+
+$app->post('/renewcredentials', function (Request $request, Response $response) {
+  $auth = apache_request_headers();
+  $token = $auth['Authorization'];
+  $partsToken =  explode('.', $token);
+  var_dump($partsToken);
+
+  $data = json_decode(base64_decode($partsToken[1], true));
+
+  $cnn = new DB();
+  $resp = '';
+  
+  try{
+    $cnn = $cnn->connect();
+    
+    if(!$cnn){
+      throw new Exception("Error al conectar con la base de datos.", 1);
+    }
+
+    $sql= "SELECT email, name, last_name_1, last_name_2, rol, route_image FROM Users WHERE id_user = '{$data->id_user}'"; 
+    $stmt = $cnn->query($sql);
+    $cnn-> close();
+
+    while ($row = $stmt->fetch_assoc())
+        $ret[]= $row;
+
+    $resp = '{"email": "a"}';
+
+  }catch (Exception $e){             
+    $resp = '{"error":{"text":"'.$e->getMessage().'"}}';
+  }
+
+  $response->getBody()->write($resp);
+  $response->withHeader('Content-Type', 'application/json');
+  return $response;  
 });
