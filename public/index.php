@@ -11,29 +11,33 @@ $config = ['settings' => [
 
 $app = new \Slim\App($config);
 
-$middleware = function ($request, $response, $next) 
-{
-  $route = $request->getUri()->getPath();
+// $middleware = function ($request, $response, $next) 
+// {
+//   $route = $request->getUri()->getPath();
+  
+//   $publicRoutes = [
+//     'login',
+//     'signin'
+//   ];
 
-  $publicRoutes = [
-    '/login',
-    '/signin'
-  ];
+//   if (!in_array($route, $publicRoutes)) {
+//     $auth = apache_request_headers();
+//     $auth = $auth['Authorization'];
 
-  if(!in_array($route, $publicRoutes)) {
-    $response = $next($request, $response);
-  } else {
-    $auth = apache_request_headers();
-    $auth = $auth['Authorization'];
+//     if(JWT::validate($auth, TOKEN_KEY)){
 
-    if (JWT::validate($auth, TOKEN_KEY)) {
-      $response = $next($request, $response);
-    } else {
-      $response = $response->withStatus(401);
-    }
-  }
-  return $response;
-};
+//       $response = $next($request, $response);
+
+//     }else{
+//       $response = $response->withStatus(401);
+//     } 
+
+//   }else{
+//     $response = $next($request, $response);
+//   }
+
+//   return $response;
+// };
 
 /**
  * New routes
@@ -42,5 +46,5 @@ $middleware = function ($request, $response, $next)
 require "../src/routes/login.php";
 
 
-$app->add($middleware);
+// $app->add($middleware);
 $app->run();

@@ -16,8 +16,8 @@ class JWT {
         return $jwt;
     }
 
-    public static function validate($token, $key)
-    {
+    public static function validate($token, $key) {
+
         $jwt_values = explode(".", $token);
 
         $recieved_signature = $jwt_values[2];
@@ -26,23 +26,16 @@ class JWT {
         $arrExpires = json_decode(base64_decode($jwt_values[1], true));
         
         $expires = $arrExpires->ends;
-        var_dump($expires);
         
         $now = new DateTime();
         $now = $now->getTimeStamp();
-
+        
         $resultedSignature = base64_encode(hash_hmac('SHA256', $recieved_header_payload, $key, true));
 
-        if ($expires > $now && $resultedSignature == $recieved_signature ) {
+        if ($expires > $now && $resultedSignature === $recieved_signature) {
             return true;
         } else {
             return false;
         }
     }
-
-    public static function getData($token){
-        $jwt_values = explode('.', $token);  
-
-        return json_decode(base64_decode($jwt_values[1]),true);  
-      }
 }

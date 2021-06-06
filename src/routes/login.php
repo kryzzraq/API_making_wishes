@@ -41,11 +41,18 @@ $app->post('/login', function (Request $request, Response $response, array $args
       ];
       
       $token = JWT::createToken($payload, TOKEN_KEY);
-    }    
-    $resp = '{"email": "'.$ret[0]["email"].'","name":"'.$ret[0]["name"].
-      '","last_name_1":"'.$ret[0]["last_name_1"].'","last_name_2":"'.$ret[0]["last_name_2"].
-      '","rol":"'.$ret[0]["rol"].'","route_image":"'.$ret[0]["route_image"].
-      '","id":"'.$ret[0]["id_user"].'","token":"'.$token.'"}';
+    }  
+    $arr = array(
+      "email" => $ret[0]["email"],
+      "name" => $ret[0]["name"],
+      "last_name_1" => $ret[0]["last_name_1"],
+      "last_name_2" => $ret[0]["last_name_2"],
+      "rol" => $ret[0]["rol"],
+      "route_image" => $ret[0]["route_image"],
+      "id" => $ret[0]["id_user"],
+      "token" => $token
+    );  
+    $resp = json_encode($arr);
     
     
   }catch (Exception $e){             
@@ -130,7 +137,7 @@ $app->post('/signin', function (Request $request, Response $response, array $arg
             if(!$stmt){
               throw new Exception("Ha habido un error, intentelo más tarde.", 5);
             } else{
-              $json = '{"text": "USUARIO REGISTRADO CORRECTAMENTE."}';
+              $json = '{"text": "Usuario registrado correctamente."}';
             }
         
           } catch (Exception $e) {
@@ -177,11 +184,10 @@ $app->get('/signoff', function (Request $request, Response $response) {
   return $response; 
 });
 
-$app->post('/renewcredentials', function (Request $request, Response $response) {
+$app->get('/renewcredentials', function (Request $request, Response $response) {
   $auth = apache_request_headers();
   $token = $auth['Authorization'];
   $partsToken =  explode('.', $token);
-  var_dump($partsToken);
 
   $data = json_decode(base64_decode($partsToken[1], true));
 
@@ -202,7 +208,15 @@ $app->post('/renewcredentials', function (Request $request, Response $response) 
     while ($row = $stmt->fetch_assoc())
         $ret[]= $row;
 
-    $resp = '{"email": "a"}';
+    $arr = array(
+      "email" => $ret[0]["email"],
+      "name" => $ret[0]["name"],
+      "last_name_1" => $ret[0]["last_name_1"],
+      "last_name_2" => $ret[0]["last_name_2"],
+      "rol" => $ret[0]["rol"],
+      "route_image" => $ret[0]["route_image"]
+    );
+    $resp = json_encode($arr);
 
   }catch (Exception $e){             
     $resp = '{"error":{"text":"'.$e->getMessage().'"}}';
