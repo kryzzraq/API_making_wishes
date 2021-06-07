@@ -111,7 +111,7 @@ $app->post('/signin', function (Request $request, Response $response, array $arg
           try {
         
             if($ext != 'jpg' && $ext !='png' && $ext != 'PNG' && $ext != 'JPG'){
-              throw new Exception("Formato no válido", 1);
+              throw new Exception("Formato de imagen no válido", 1);
             }
             $location = 'upload/';
         

@@ -43,7 +43,11 @@ $app = new \Slim\App($config);
  * New routes
  */
 
+//login, registro, cerrar sesión, renovar datos
 require "../src/routes/login.php";
+
+//nuevo deseo
+require "../src/routes/new_wish.php";
 
 
 // $app->add($middleware);
