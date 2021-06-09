@@ -46,9 +46,17 @@ $app = new \Slim\App($config);
 //login, registro, cerrar sesión, renovar datos
 require "../src/routes/login.php";
 
-//nuevo deseo
+//crear deseo, cargar todos los deseos, borrar deseo
 require "../src/routes/new_wish.php";
 
+//crear grupo, borrar grupo
+require "../src/routes/groups.php";
+
+//cargar deseos de un grupo concreto, cargar miembros de un grupo concreto
+require "../src/routes/wish_groups.php";
+
+//cargar los contactos de un usuario concreto
+require "../src/routes/users_actions.php";
 
 // $app->add($middleware);
 $app->run();

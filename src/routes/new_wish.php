@@ -2,6 +2,41 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
+
+$app->post('/selectWish', function (Request $request, Response $response, array $args) {
+    $cnn = new DB();
+    $id_item = $request->getParam("id_item");
+
+    try{
+        $cnn = $cnn->connect();
+      
+        if(!$cnn){
+            throw new Exception("Error al conectar con la base de datos.", 1);
+        }
+
+        $sql = "UPDATE items SET available = 'no' WHERE id_item = '{$id_item}'";
+
+        $stmt1 = $cnn->query($sql);
+        $cnn-> close(); 
+
+        if(!$stmt1) {
+            throw new Exception("Ha habido un error, intentelo más tarde.");
+        }
+
+
+        $resp = '{"text": "Deseo seleccionado."}';
+
+    } catch (Exception $e) {
+        $response = $response->withStatus(400);        
+        $resp = '{"error": "'.$e-> getMessage().'"}';
+    }
+
+    $response->getBody()->write($resp);
+    $response->withHeader('Content-Type', 'application/json');
+    return $response;
+});
+
+
 $app->get('/loadUserWishes', function (Request $request, Response $response, array $args) {
     $cnn = new DB();
     $auth = apache_request_headers();
@@ -71,7 +106,7 @@ $app->post('/createWish', function (Request $request, Response $response, array 
 
     $stmt = $cnn->query($sqlSaveItem);
     if(!$stmt) {
-        throw new Exception("2Ha habido un error, intentelo más tarde.");
+        throw new Exception("Ha habido un error, intentelo más tarde.");
     }
 
     //coger el id del item que acabamos de guardar

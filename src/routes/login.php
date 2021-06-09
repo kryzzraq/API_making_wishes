@@ -21,7 +21,7 @@ $app->post('/login', function (Request $request, Response $response, array $args
     
     $user = $request->getParam('email');
     $pw= $request->getParam('passwd'); 
-    $sql= "SELECT email, name, last_name_1, last_name_2, rol, route_image, id_user FROM Users WHERE email = '{$user}' and password = '{$pw}'"; 
+    $sql= "SELECT email, name, last_name_1, last_name_2, rol, route_image, id_user FROM users WHERE email = '{$user}' and password = '{$pw}'"; 
     $stmt = $cnn->query($sql);
     $cnn-> close();
     
@@ -121,7 +121,7 @@ $app->post('/signin', function (Request $request, Response $response, array $arg
             $filename = $now . $path;
             $totalPath = $location.$filename;
 
-            move_uploaded_file($_FILES['image']['tmp_name'],$location.$filename);
+            move_uploaded_file($_FILES['image']['tmp_name'],$totalPath);
 
         
             $arr = array("imagen"=>$filename);
@@ -147,15 +147,15 @@ $app->post('/signin', function (Request $request, Response $response, array $arg
 
 
       } else {
-        $sql = "INSERT INTO `users` (`name`, `last_name_1`, `last_name_2`, `email`, `password`, `rol`) 
+        $sql = "INSERT INTO `users` (`name`, `last_name_1`, `last_name_2`, `email`, `password`, `rol`, `route_image` ) 
         VALUES ('{$request->getParam("name")}', '{$request->getParam("last_name_1")}', '{$request->getParam("last_name_2")}', 
-        '{$request->getParam("email")}', '{$request->getParam("password1")}', 'wisher')";
+        '{$request->getParam("email")}', '{$request->getParam("password1")}', 'normal', 'public/upload/user_anon.png')";
 
         $stmt = $cnn->query($sql);
         $cnn-> close();
   
         if(!$stmt){
-          throw new Exception("Ha habido un error, intentelo más tarde.", 5);
+          throw new Exception("Ha habiwdo un error, intentelo más tarde.", 5);
         } else{
           $json = '{"text": "Usuario registrado correctamente."}';
         }
@@ -201,7 +201,7 @@ $app->get('/renewcredentials', function (Request $request, Response $response) {
       throw new Exception("Error al conectar con la base de datos.", 1);
     }
 
-    $sql= "SELECT email, name, last_name_1, last_name_2, rol, route_image FROM Users WHERE id_user = '{$data->id_user}'"; 
+    $sql= "SELECT email, name, last_name_1, last_name_2, rol, route_image, id_user FROM users WHERE id_user = '{$data->id_user}'"; 
     $stmt = $cnn->query($sql);
     $cnn-> close();
 
@@ -214,7 +214,8 @@ $app->get('/renewcredentials', function (Request $request, Response $response) {
       "last_name_1" => $ret[0]["last_name_1"],
       "last_name_2" => $ret[0]["last_name_2"],
       "rol" => $ret[0]["rol"],
-      "route_image" => $ret[0]["route_image"]
+      "route_image" => $ret[0]["route_image"],
+      "id_user" => $ret[0]["id_user"]
     );
     $resp = json_encode($arr);
 
@@ -222,6 +223,111 @@ $app->get('/renewcredentials', function (Request $request, Response $response) {
     $resp = '{"error":{"text":"'.$e->getMessage().'"}}';
   }
 
+  $response->getBody()->write($resp);
+  $response->withHeader('Content-Type', 'application/json');
+  return $response;  
+});
+
+$app->post('/changePassword', function (Request $request, Response $response, array $args) {
+  $cnn = new DB();
+  $password = $request->getParam("password");
+
+  $auth = apache_request_headers();
+    $token = $auth['Authorization'];
+    $partsToken =  explode('.', $token);
+
+    $data = json_decode(base64_decode($partsToken[1], true));
+
+  try{
+    $cnn = $cnn->connect();
+    
+    if(!$cnn){
+      throw new Exception("Error al conectar con la base de datos.", 1);
+    }
+
+    $sql = "UPDATE users
+      SET password = '{$password}' WHERE id_user = '{$data->id_user}'";
+
+    $stmt = $cnn->query($sql);
+    $cnn-> close();
+
+    if(!$stmt){
+      throw new Exception("Ha habiwdo un error, intentelo más tarde.", 5);
+    } else{
+      $json = '{"text": "Contraseña cambiada correctamente"}';
+    }
+
+    $resp = $json;
+
+  } catch (Exception $e){             
+    $resp = '{"error":{"text":"'.$e->getMessage().'"}}';
+  }
+  $response->getBody()->write($resp);
+  $response->withHeader('Content-Type', 'application/json');
+  return $response;  
+});
+
+$app->post('/changeAvatar', function (Request $request, Response $response, array $args) {
+  $cnn = new DB();
+
+  $auth = apache_request_headers();
+    $token = $auth['Authorization'];
+    $partsToken =  explode('.', $token);
+
+    $data = json_decode(base64_decode($partsToken[1], true));
+
+  try{
+    $cnn = $cnn->connect();
+    if(!$cnn){
+      throw new Exception("Error al conectar con la base de datos.", 1);
+
+      if (isset($_FILES['image']['name'])) {
+        $path = $_FILES['image']['name'];
+        $ext = pathinfo($path, PATHINFO_EXTENSION);
+        $restado='';
+
+        try {
+        
+          if($ext != 'jpg' && $ext !='png' && $ext != 'PNG' && $ext != 'JPG'){
+            throw new Exception("Formato de imagen no válido", 1);
+          }
+          $location = 'upload/';
+      
+          $now = new DateTime();
+          $now = $now->getTimeStamp();
+      
+          $filename = $now . $path;
+          $totalPath = $location.$filename;
+
+          move_uploaded_file($_FILES['image']['tmp_name'],$totalPath);
+
+      
+          $arr = array("imagen"=>$filename);
+          $restado = json_encode($arr);
+          ;
+          $sql = "UPDATE `users` SET `route_image` = '{$totalPath}' WHERE `users`.`id_user` = '{$data->id_user}'";
+
+          $stmt = $cnn->query($sql);
+          $cnn-> close();
+    
+          if(!$stmt){
+            throw new Exception("Ha habido un error, intentelo más tarde.", 5);
+          } else{
+            $json = '{"text": "Avatar cambiado correctamente"}';
+          }
+      
+        } catch (Exception $e) {
+          $response = $response->withStatus(400);
+          $resp = '{"error": "'.$e-> getMessage().'"}';
+        }
+      }
+    }
+
+    $resp = $json;
+
+  } catch (Exception $e){             
+    $resp = '{"error":{"text":"'.$e->getMessage().'"}}';
+  }
   $response->getBody()->write($resp);
   $response->withHeader('Content-Type', 'application/json');
   return $response;  
