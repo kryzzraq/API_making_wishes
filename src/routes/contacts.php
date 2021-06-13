@@ -143,11 +143,13 @@ $app->post('/loadAllContacts', function (Request $request, Response $response, a
             throw new Exception("Error al conectar con la base de datos.", 1);
         }
 
-        $sql = "SELECT name, last_name_1, last_name_2, email, route_image 
+        $sql = "SELECT name, last_name_1, last_name_2, email, route_image, id_user
             FROM `users` where id_user != '{$data->id_user}' and id_user not in 
             (select id_user_2 from added_users where id_user_1 = '{$data->id_user}') 
             and id_user in (select id_user from users 
-                where name like '%{$search}%' or last_name_1 like '%{$search}%' or last_name_2 like '%{$search}%' or email like '%{$search}%')";
+            where name like '%{$search}%' or last_name_1 like '%{$search}%' or last_name_2 like '%{$search}%' or email like '%{$search}%')
+            and id_user not in 
+            (select user_notif from notifications where   adding_user = '{$data->id_user}')";
 
         $stmt1 = $cnn->query($sql);
         $cnn-> close(); 

@@ -61,5 +61,8 @@ require "../src/routes/users_actions.php";
 //eliminar contacto, ver detalles de un contacto
 require "../src/routes/contacts.php";
 
+//mandar notificacion, aceptar amigo, rechazar amigo, leer notificacion
+require "../src/routes/notif.php";
+
 // $app->add($middleware);
 $app->run();
