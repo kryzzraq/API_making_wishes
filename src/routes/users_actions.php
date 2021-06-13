@@ -18,7 +18,7 @@ $app->get('/loadContacts', function (Request $request, Response $response, array
             throw new Exception("Error al conectar con la base de datos.", 1);
         }
 
-        $sql ="SELECT name, last_name_1, last_name_2, email, id_user 
+        $sql ="SELECT name, last_name_1, last_name_2, email, id_user, route_image
         FROM `added_users` inner join users on id_user_2 = id_user 
         where id_user_1 = 2";
 

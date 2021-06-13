@@ -191,6 +191,7 @@ $app->post('/createGroup', function (Request $request, Response $response, array
         }
 
         //se registra el grupo description, name, route_image, id_user_owner
+
         if (isset($_FILES['image']['name'])) {
             $path = $_FILES['image']['name'];
             $ext = pathinfo($path, PATHINFO_EXTENSION);
@@ -208,32 +209,35 @@ $app->post('/createGroup', function (Request $request, Response $response, array
                 $filename = $now . $path;
                 $totalPath = $location.$filename;
     
-                move_uploaded_file($_FILES['image']['tmp_name'],$location.$filename);
+                move_uploaded_file($_FILES['image']['tmp_name'],$totalPath);
     
             
                 $arr = array("imagen"=>$filename);
                 $restado = json_encode($arr);
-
+    
                 $sqlGroup = "INSERT INTO `groups` (`name`, `description`, `route_image`, `id_user_owner`) 
                     VALUES ('{$request->getParam("group_name")}', '{$request->getParam("group_description")}', '{$totalPath}', 
-                    '{$data->id_user}')";
+                   '{$data->id_user}')";
 
+              
+    
                 $stmt = $cnn->query($sqlGroup);
                 $cnn-> close();
-
+          
                 if(!$stmt){
-                    throw new Exception("Ha habido un error, intentelo más tarde.", 5);
+                  throw new Exception("Ha habido un error, intentelo más tarde.", 5);
                 } else{
-                    $json = '{"text": "Grupo registrado correctamente."}';
+                  $resp = '{"text": "Avatar cambiado correctamente."}';
                 }
-
-            } catch (Exception $e) {
+            
+              } catch (Exception $e) {
                 $response = $response->withStatus(400);
                 $resp = '{"error": "'.$e-> getMessage().'"}';
-            }
+              }
+            
         } else {
             $sqlGroup = "INSERT INTO `groups` (`name`, `description`, `route_image`, `id_user_owner`) 
-            VALUES ('{$request->getParam("group_name")}', '{$request->getParam("group_description")}', 'public/upload/group_anon.png', 
+            VALUES ('{$request->getParam("group_name")}', '{$request->getParam("group_description")}', 'upload/group_anon.png', 
             '{$data->id_user}')";
 
             $stmt = $cnn->query($sqlGroup);
@@ -242,7 +246,7 @@ $app->post('/createGroup', function (Request $request, Response $response, array
             if(!$stmt){
                 throw new Exception("Ha habido un error, intentelo más tarde.", 5);
             } else{
-                $json = '{"text": "Grupo registrado correctamente."}';
+                $resp = '{"text": "Grupo registrado correctamente."}';
             }
         }
     }
@@ -250,8 +254,6 @@ $app->post('/createGroup', function (Request $request, Response $response, array
         $response = $response->withStatus(400);        
         $resp = '{"error": "'.$e-> getMessage().'"}';
     }
-
-    $resp = $json;
 
     $response->getBody()->write($resp);
     $response->withHeader('Content-Type', 'application/json');

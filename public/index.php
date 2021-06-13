@@ -58,5 +58,8 @@ require "../src/routes/wish_groups.php";
 //cargar los contactos de un usuario concreto
 require "../src/routes/users_actions.php";
 
+//eliminar contacto, ver detalles de un contacto
+require "../src/routes/contacts.php";
+
 // $app->add($middleware);
 $app->run();

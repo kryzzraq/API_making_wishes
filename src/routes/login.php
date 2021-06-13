@@ -230,6 +230,7 @@ $app->get('/renewcredentials', function (Request $request, Response $response) {
 
 $app->post('/changePassword', function (Request $request, Response $response, array $args) {
   $cnn = new DB();
+  
   $password = $request->getParam("password");
 
   $auth = apache_request_headers();
@@ -269,62 +270,61 @@ $app->post('/changePassword', function (Request $request, Response $response, ar
 
 $app->post('/changeAvatar', function (Request $request, Response $response, array $args) {
   $cnn = new DB();
-
   $auth = apache_request_headers();
-    $token = $auth['Authorization'];
-    $partsToken =  explode('.', $token);
+  $token = $auth['Authorization'];
+  $partsToken =  explode('.', $token);
 
-    $data = json_decode(base64_decode($partsToken[1], true));
-
+  $data = json_decode(base64_decode($partsToken[1], true));
   try{
     $cnn = $cnn->connect();
+    
     if(!$cnn){
       throw new Exception("Error al conectar con la base de datos.", 1);
+    }
+    
+    $ret = null;
+    $resp = '';    
 
       if (isset($_FILES['image']['name'])) {
         $path = $_FILES['image']['name'];
         $ext = pathinfo($path, PATHINFO_EXTENSION);
         $restado='';
-
-        try {
+          try {
         
-          if($ext != 'jpg' && $ext !='png' && $ext != 'PNG' && $ext != 'JPG'){
-            throw new Exception("Formato de imagen no válido", 1);
+            if($ext != 'jpg' && $ext !='png' && $ext != 'PNG' && $ext != 'JPG'){
+              throw new Exception("Formato de imagen no válido", 1);
+            }
+            $location = 'upload/';
+        
+            $now = new DateTime();
+            $now = $now->getTimeStamp();
+        
+            $filename = $now . $path;
+            $totalPath = $location.$filename;
+
+            move_uploaded_file($_FILES['image']['tmp_name'],$totalPath);
+
+        
+            $arr = array("imagen"=>$filename);
+            $restado = json_encode($arr);
+
+            $sql= "UPDATE `users` SET `route_image` = '{$totalPath}' WHERE `users`.`id_user` = '{$data->id_user}';";
+          
+
+            $stmt = $cnn->query($sql);
+            $cnn-> close();
+      
+            if(!$stmt){
+              throw new Exception("Ha habido un error, intentelo más tarde.", 5);
+            } else{
+              $resp = '{"text": "Avatar cambiado correctamente."}';
+            }
+        
+          } catch (Exception $e) {
+            $response = $response->withStatus(400);
+            $resp = '{"error": "'.$e-> getMessage().'"}';
           }
-          $location = 'upload/';
-      
-          $now = new DateTime();
-          $now = $now->getTimeStamp();
-      
-          $filename = $now . $path;
-          $totalPath = $location.$filename;
-
-          move_uploaded_file($_FILES['image']['tmp_name'],$totalPath);
-
-      
-          $arr = array("imagen"=>$filename);
-          $restado = json_encode($arr);
-          ;
-          $sql = "UPDATE `users` SET `route_image` = '{$totalPath}' WHERE `users`.`id_user` = '{$data->id_user}'";
-
-          $stmt = $cnn->query($sql);
-          $cnn-> close();
-    
-          if(!$stmt){
-            throw new Exception("Ha habido un error, intentelo más tarde.", 5);
-          } else{
-            $json = '{"text": "Avatar cambiado correctamente"}';
-          }
-      
-        } catch (Exception $e) {
-          $response = $response->withStatus(400);
-          $resp = '{"error": "'.$e-> getMessage().'"}';
         }
-      }
-    }
-
-    $resp = $json;
-
   } catch (Exception $e){             
     $resp = '{"error":{"text":"'.$e->getMessage().'"}}';
   }

@@ -167,23 +167,14 @@ $app->post('/deleteWish', function (Request $request, Response $response, array 
             throw new Exception("Error al conectar con la base de datos.", 1);
         }
 
-        $id_item = $request->getParam("item_id");
+        $id_item = $request->getParam("id_item");
         $id_user = $data->id_user;
-
-        $sqlList = "DELETE FROM wish_list_users WHERE id_user='{$id_user}' AND id_item = '{$id_item}'";
-
-        $stmt1 = $cnn->query($sqlList);
-
-        if(!$stmt1) {
-            throw new Exception("Ha ocurrido un error inexperado, por favor intentelo más tarde.");
-        }
 
         $sqlItem = "DELETE FROM items WHERE id_item = '{$id_item}'";
         $stmt2 = $cnn->query($sqlItem);
 
         if (!$stmt2) {
             throw new Exception("Ha ocurrido un error inexperado, por favor intentelo más tarde.");
-            
         }
 
         $cnn->close();
