@@ -21,7 +21,7 @@ $app->post('/deleteContact', function (Request $request, Response $response, arr
 
         $sql1 = "DELETE FROM `added_users` WHERE id_user_1 = '{$data->id_user}' and id_user_2 = '{$id_contact}'";
 
-        $sql2 = "DELETE FROM `added_users` WHERE id_user_2 = '{$id_contact}' and id_user_1 = '{$data->id_user}'"; 
+        $sql2 = "DELETE FROM `added_users` WHERE id_user_1 = '{$id_contact}' and id_user_2 = '{$data->id_user}'"; 
 
         $stmt = $cnn->query($sql1);
         $stmt2 = $cnn->query($sql2);

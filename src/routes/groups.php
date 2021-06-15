@@ -260,3 +260,34 @@ $app->post('/createGroup', function (Request $request, Response $response, array
     return $response;
 
 });
+
+$app->post('/deleteGroup', function (Request $request, Response $response, array $args) {
+    $cnn = new DB();
+    $id_group = $request->getParam('id_group');
+    try{
+        $cnn = $cnn->connect();
+      
+        if(!$cnn){
+            throw new Exception("Error al conectar con la base de datos.", 1);
+        }
+
+        $sqlItem = "DELETE FROM groups WHERE id_group = '{$id_group}'";
+        $stmt2 = $cnn->query($sqlItem);
+
+        if (!$stmt2) {
+            throw new Exception("Ha ocurrido un error inexperado, por favor intentelo más tarde.");
+        }
+
+        $cnn->close();
+
+        $resp = '{"text": "Datos eliminados correctamente"}';
+
+    } catch (Exception $e) {
+        $response = $response->withStatus(400);        
+        $resp = '{"error": "'.$e-> getMessage().'"}';
+    }
+
+    $response->getBody()->write($resp);
+    $response->withHeader('Content-Type', 'application/json');
+    return $response;
+});

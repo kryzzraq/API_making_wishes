@@ -96,15 +96,20 @@ $app->get('/loadNotifUsers', function (Request $request, Response $response) {
   
       $sql = "SELECT id_notif, adding_user, kind, name, last_name_1, last_name_2, recibed, id_user FROM `notifications` 
         inner join users on users.id_user = notifications.adding_user 
-        WHERE user_notif = '{$data->id_user}' and adding_user is not null";
+        WHERE user_notif = '{$data->id_user}' and adding_user is not null and recibed = 'no'";
 
       $stmt = $cnn->query($sql);
       $cnn-> close();
   
-      while ($row = $stmt->fetch_assoc())
-          $ret[]= $row;
-
-      $resp = json_encode($ret);
+      if($stmt){
+        $ret = [];
+        while ($row = $stmt->fetch_assoc())
+            $ret[]= $row;
+  
+        $resp = json_encode($ret);
+      } else {
+        $resp = "";
+      }
   
     }catch (Exception $e){             
       $resp = '{"error":{"text":"'.$e->getMessage().'"}}';
@@ -134,14 +139,19 @@ $app->get('/loadNotifUsers', function (Request $request, Response $response) {
   
       $sql= "SELECT id_notif, recibed, notifications.id_group, kind, name FROM `notifications` 
         inner join `groups` on groups.id_group = notifications.id_group 
-        WHERE user_notif = '{$data->id_user}' and notifications.id_group is not null"; 
+        WHERE user_notif = '{$data->id_user}' and notifications.id_group is not null and recibed = 'no'"; 
       $stmt = $cnn->query($sql);
       $cnn-> close();
   
-      while ($row = $stmt->fetch_assoc())
-          $ret[]= $row;
-
-      $resp = json_encode($ret);
+      if($stmt){
+        $ret = [];
+        while ($row = $stmt->fetch_assoc())
+            $ret[]= $row;
+  
+        $resp = json_encode($ret);
+      } else {
+        $resp = "";
+      }
   
     }catch (Exception $e){             
       $resp = '{"error":{"text":"'.$e->getMessage().'"}}';
@@ -174,6 +184,48 @@ $app->get('/loadNotifUsers', function (Request $request, Response $response) {
       }
 
       $resp = '{"text":"Notificación recibida"}';
+  
+    }catch (Exception $e){             
+      $resp = '{"error":{"text":"'.$e->getMessage().'"}}';
+    }
+  
+    $response->getBody()->write($resp);
+    $response->withHeader('Content-Type', 'application/json');
+    return $response;  
+  });
+
+  $app->post('/acceptFriendship', function (Request $request, Response $response) {
+    $id_notif = $request->getParam('id_notif');
+    $id_user_notif= $request->getParam('id_user_notif');
+
+    $auth = apache_request_headers();
+    $token = $auth['Authorization'];
+    $partsToken =  explode('.', $token);
+  
+    $data = json_decode(base64_decode($partsToken[1], true));
+  
+    $cnn = new DB();
+    $resp = '';
+    
+    try{
+      $cnn = $cnn->connect();
+      
+      if(!$cnn){
+        throw new Exception("Error al conectar con la base de datos.", 1);
+      }
+  
+      $sql = "UPDATE `notifications` SET `recibed` = 'yes' WHERE `notifications`.`id_notif` = '{$id_notif}'"; 
+      $sql1 = "INSERT INTO `added_users` (`id_user_1`, `id_user_2`) VALUES ('{$data->id_user}', '{$id_user_notif}'), ('{$id_user_notif}', '{$data->id_user}');";
+
+      $stmt = $cnn->query($sql);
+      $stmt1 = $cnn->query($sql1);
+      $cnn-> close();
+  
+      if(!$stmt || !$stmt1){
+          throw new Exception("Error en la conuslta");          
+      }
+
+      $resp = '{"text":"Amistad aceptada"}';
   
     }catch (Exception $e){             
       $resp = '{"error":{"text":"'.$e->getMessage().'"}}';
