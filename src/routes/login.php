@@ -31,13 +31,9 @@ $app->post('/login', function (Request $request, Response $response, array $args
       while ($row = $stmt->fetch_assoc())
         $ret[]= $row;
 
-      $now = new DateTime();
-      $expirationDate = new DateTime("now +1 hours");
       $payload = [
         "id_user" => $ret[0]["id_user"],
-        "rol" => "wisher",
-        "starts" => $now->getTimeStamp(),
-        "ends" => $expirationDate->getTimeStamp()
+        "rol" =>  $ret[0]["rol"]
       ];
       
       $token = JWT::createToken($payload, TOKEN_KEY);

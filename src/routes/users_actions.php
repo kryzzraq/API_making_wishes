@@ -11,6 +11,7 @@ $app->get('/loadContacts', function (Request $request, Response $response, array
 
     $data = json_decode(base64_decode($partsToken[1], true));
 
+
     try{
         $cnn = $cnn->connect();
       
@@ -20,7 +21,7 @@ $app->get('/loadContacts', function (Request $request, Response $response, array
 
         $sql ="SELECT name, last_name_1, last_name_2, email, id_user, route_image
         FROM `added_users` inner join users on id_user_2 = id_user 
-        where id_user_1 = 2";
+        where id_user_1 = '{$data->id_user}'";
 
         $stmt = $cnn->query($sql);
         $cnn->close();
