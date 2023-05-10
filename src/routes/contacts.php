@@ -149,7 +149,7 @@ $app->post('/loadAllContacts', function (Request $request, Response $response, a
             and id_user in (select id_user from users 
             where name like '%{$search}%' or last_name_1 like '%{$search}%' or last_name_2 like '%{$search}%' or email like '%{$search}%')
             and id_user not in 
-            (select user_notif from notifications where   adding_user = '{$data->id_user}')";
+            (select added_user from notifications where   adding_user = '{$data->id_user}')";
 
         $stmt1 = $cnn->query($sql);
         $cnn-> close(); 

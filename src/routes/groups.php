@@ -12,7 +12,7 @@ $app->post('/loadInfoGroup', function (Request $request, Response $response, arr
             throw new Exception("Error al conectar con la base de datos.", 1);
         }
 
-        $sql = "SELECT description, route_image, name FROM `groups` 
+        $sql = "SELECT groups.description, groups.route_image, groups.name, users.name, users.last_name_1, users.last_name_2 FROM `groups` INNER join users on users.id_user = groups.id_user_owner  
             where id_group = '{$id_group}'";
 
         $stmt = $cnn->query($sql);

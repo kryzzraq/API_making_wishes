@@ -4,7 +4,9 @@ use \Psr\Http\Message\ResponseInterface as Response;
 
 $app->post('/sendFriendship', function (Request $request, Response $response, array $args) {
     $cnn = new DB();
-    $id_user_notif = $request->getParam("id_user_notif");
+    $id_added_user = $request->getParam("id_user_notif");
+    $my_id = $request->getParam("my_id");
+
 
     $auth = apache_request_headers();
     $token = $auth['Authorization'];
@@ -19,8 +21,8 @@ $app->post('/sendFriendship', function (Request $request, Response $response, ar
             throw new Exception("Error al conectar con la base de datos.", 1);
         }
 
-        $sql = "INSERT INTO `notifications`(`recibed`, `user_notif`, `adding_user`, `id_group`, `kind`) 
-            VALUES ('no','{$id_user_notif}','{$data->id_user}',NULL,'friendship')";
+        $sql = "INSERT INTO `notifications`(`recibed`, `added_user`, `adding_user`, `id_group`, `kind`) 
+            VALUES ('no','{$id_added_user}','{$my_id}',NULL,'friendship')";
 
         $stmt1 = $cnn->query($sql);
         $cnn-> close(); 
@@ -45,7 +47,7 @@ $app->post('/sendFriendship', function (Request $request, Response $response, ar
 $app->post('/sendGroupNotif', function (Request $request, Response $response, array $args) {
     $cnn = new DB();
     $id_group = $request->getParam('id_group');
-    $id_user_notif = $request->getParam("id_user_member");
+    $id_added_user = $request->getParam("id_user_member");
 
     try{
         $cnn = $cnn->connect();
@@ -54,8 +56,8 @@ $app->post('/sendGroupNotif', function (Request $request, Response $response, ar
             throw new Exception("Error al conectar con la base de datos.", 1);
         }
 
-        $sql = "INSERT INTO `notifications`(`recibed`, `user_notif`, `adding_user`, `id_group`, `kind`) 
-        VALUES ('no','{$id_user_notif}',NULL,'{$id_group}','group')";
+        $sql = "INSERT INTO `notifications`(`recibed`, `added_user`, `adding_user`, `id_group`, `kind`) 
+        VALUES ('no','{$id_added_user}',NULL,'{$id_group}','group')";
 
         $stmt1 = $cnn->query($sql);
         $cnn-> close(); 
@@ -96,7 +98,7 @@ $app->get('/loadNotifUsers', function (Request $request, Response $response) {
   
       $sql = "SELECT id_notif, adding_user, kind, name, last_name_1, last_name_2, recibed, id_user FROM `notifications` 
         inner join users on users.id_user = notifications.adding_user 
-        WHERE user_notif = '{$data->id_user}' and adding_user is not null and recibed = 'no'";
+        WHERE added_user = '{$data->id_user}' and adding_user is not null and recibed = 'no'";
 
       $stmt = $cnn->query($sql);
       $cnn-> close();
@@ -139,7 +141,7 @@ $app->get('/loadNotifUsers', function (Request $request, Response $response) {
   
       $sql= "SELECT id_notif, recibed, notifications.id_group, kind, name FROM `notifications` 
         inner join `groups` on groups.id_group = notifications.id_group 
-        WHERE user_notif = '{$data->id_user}' and notifications.id_group is not null and recibed = 'no'"; 
+        WHERE added_user = '{$data->id_user}' and notifications.id_group is not null and recibed = 'no'"; 
       $stmt = $cnn->query($sql);
       $cnn-> close();
   
@@ -196,7 +198,8 @@ $app->get('/loadNotifUsers', function (Request $request, Response $response) {
 
   $app->post('/acceptFriendship', function (Request $request, Response $response) {
     $id_notif = $request->getParam('id_notif');
-    $id_user_notif= $request->getParam('id_user_notif');
+    $id_added_user = $request->getParam("id_user_notif");
+    $my_id = $request->getParam("my_id");
 
     $auth = apache_request_headers();
     $token = $auth['Authorization'];
@@ -215,7 +218,7 @@ $app->get('/loadNotifUsers', function (Request $request, Response $response) {
       }
   
       $sql = "UPDATE `notifications` SET `recibed` = 'yes' WHERE `notifications`.`id_notif` = '{$id_notif}'"; 
-      $sql1 = "INSERT INTO `added_users` (`id_user_1`, `id_user_2`) VALUES ('{$data->id_user}', '{$id_user_notif}'), ('{$id_user_notif}', '{$data->id_user}');";
+      $sql1 = "INSERT INTO `added_users` (`id_user_1`, `id_user_2`) VALUES ('{$my_id}', '{$id_added_user}'), ('{$id_added_user}', '{$my_id}');";
 
       $stmt = $cnn->query($sql);
       $stmt1 = $cnn->query($sql1);
